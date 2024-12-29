@@ -17,7 +17,7 @@ To run the project on your local machine, follow these steps:
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/username/project-name.git
+   git clone https://github.com/osmanceliktr/image-classification-app.git
    ```
 2. Navigate to the project directory:
    ```bash
