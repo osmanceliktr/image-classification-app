@@ -173,3 +173,17 @@ input[type="file"] {
   font-weight: bold;
   margin: 0;
 }
+footer {
+  color: #666;
+  font-size: 12px;
+  margin-top: 20px;
+  padding: 0;
+  text-align: center;
+}
+footer p {
+  margin: 0;
+}
+footer a {
+  color: #007bff;
+  text-decoration: none;
+}

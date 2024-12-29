@@ -1,13 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import "@tensorflow/tfjs";
 import './App.css';
 import ImageUploader from './components/ImageUploader';
 import PredictionResults from './components/PredictionResults';
 import { useFileReader } from './hooks/useFileReader';
-
+import imageFile from './images/image.png';
 function App() {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState('');
+  const [fileName, setFileName] = useState('');
   const [predictions, setPredictions] = useState([]);
   const [allResults, setAllResults] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -16,12 +17,23 @@ function App() {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
+    setFileName(file.name); 
     readFile(file, (result) => {
       setImage(result);
-     // setPredictions([]);
-      handlePredict(file.name);
+      setPredictions([]);
     });
   };
+  useEffect(() => {
+    if (image) {
+      const timeoutId = setTimeout(() => {
+        const imgElement = document.getElementById("uploaded-image");
+        if (imgElement) {
+          handlePredict(imgElement.src);
+        }
+      }, 100); // 100ms bekleme süresi
+      return () => clearTimeout(timeoutId);
+    }
+  }, [image]);
 
   const handleDrop = useCallback((event) => {
     event.preventDefault();
@@ -29,7 +41,6 @@ function App() {
     if (file && file.type.startsWith('image/')) {
       readFile(file, (result) => {
         setImage(result);
-        setPredictions([]);
       });
     }
   }, [readFile]);
@@ -48,7 +59,7 @@ function App() {
         pred.probability > max.probability ? pred : max, predictions[0]);
       setPredictions([highestPrediction]);
       setAllResults(prevResults => [
-        { imageName, predictions: [highestPrediction] },
+        { imageName:fileName, predictions: [highestPrediction] },
         ...prevResults
       ]);
     } catch (err) {
@@ -63,7 +74,8 @@ function App() {
   };
 
   return (
-    <div 
+    <>
+      <div 
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
       onDragEnter={()=>setIsDragging(true)}
@@ -82,7 +94,17 @@ function App() {
           style={{ cursor: 'pointer' }}
         />
       )}
-      <ImageUploader onImageChange={handleImageChange} onImageClick={handleImageClick} loading={isPredicting || loading}/>
+      {!image && (
+        <img
+          id="uploaded-image"
+          src={imageFile}
+          alt="Uploaded"
+          className="uploaded-image"
+          onClick={handleImageClick}
+          style={{ cursor: 'pointer' }}
+        />
+      )}
+      <ImageUploader onImageChange={handleImageChange} loading={isPredicting || loading}/>
       {error && (
         <div className="error-message">
           <strong>{error}</strong>
@@ -93,6 +115,10 @@ function App() {
         loading={isPredicting || loading} 
       />
     </div>
+      <footer>
+      <p>Developed by Osman Çelik - <a href="https://osmancelik.tr">osmancelik.tr</a></p>
+      </footer>
+    </>
   );
 }
 
